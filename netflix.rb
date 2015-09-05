@@ -23,7 +23,7 @@ doc.root.css('table#rhtable tr').each do |tr|
       m = contents.match(/^(\d\d)\/(\d\d)\/(\d\d)$/)
       if title && m
         watched_date = Date.new($3.to_i + 2000, $1.to_i, $2.to_i) - 1
-        watched[title] = { 'venue' => 'netflix_dvd', 'watched_date' => watched_date }
+        watched[title] = { 'venue' => 'netflix dvd', 'watched_date' => watched_date }
         puts "#{title} watched on #{watched_date}"
       end
     else

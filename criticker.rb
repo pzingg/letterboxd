@@ -27,7 +27,7 @@ require 'rubyfish'
 #  88 343 13.9  3.5
 #  83 522 21.1  3
 #  80  93  3.8  2.5
-#  78 111  4.5  2
+#  78 111  4.5  2.5
 #  73 178  7.2  2
 #  70 190  7.7  1.5
 #  60  34  1.4  1
@@ -40,7 +40,7 @@ class C2L
     [ 90, 4.0 ],
     [ 88, 3.5 ],
     [ 83, 3.0 ],
-    [ 80, 2.5 ],
+    [ 78, 2.5 ],
     [ 73, 2.0 ],
     [ 70, 1.5 ],
     [ 60, 1.0 ],
@@ -159,12 +159,12 @@ class C2L
                 days_after_start = rand(1825)
                 guessed_date = Date.new(1969, 10, 1) + days_after_start 
                 watched_date = guessed_date.strftime('%Y-%m-%d')
-                tags = 'yfs, estimate'
+                tags = 'yfs, estimated date'
               else 
                 days_after_start = rand(year < 1990 ? 5475 : 365)
                 guessed_date = Date.new(year, 12, 15) + days_after_start
                 watched_date = guessed_date.strftime('%Y-%m-%d')
-                tags = 'estimate'
+                tags = 'estimated date'
               end
             end
           end
@@ -185,6 +185,23 @@ class C2L
       write_imdb_table
     end
   end
+  
+  def find_films_with_score(s_min, s_max=-1)
+    s_max = s_min if s_max < 0
+    puts "films with scores between #{s_min} and #{s_max}"
+    doc = Nokogiri::XML(File.new('rankings.xml'))
+    doc.root.xpath('film').each do |film|
+      score  = film.at('score').text().to_i
+      next unless s_min <= score && score <= s_max
+      film_id   = film.at('filmid').text().to_i
+      film_link = film.at('filmlink').text()
+      film_name = film.at('filmname').text()
+      m_name    = film_name.match(/^\s*(.+)\((\d+)\)\s*$/)
+      title = m_name[1].strip
+      year  = m_name[2].to_i
+      puts "#{title}\t(#{year})"
+    end
+  end
 
   def dump_stats
     puts "scores"
@@ -200,6 +217,9 @@ class C2L
 end
 
 limit = (ARGV[0] || 0).to_i
+s_max = (ARGV[1] || -1).to_i
 converter = C2L.new
-converter.create_letterboxd_csv(limit)
-converter.dump_stats
+converter.find_films_with_score(limit, s_max)
+
+#converter.create_letterboxd_csv(limit)
+#converter.dump_stats
